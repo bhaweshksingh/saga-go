@@ -8,7 +8,7 @@ import (
 
 // This example demonstrates how to use the Saga library.
 func ExampleSaga() {
-	s := saga.New()
+	s, abort := saga.New()
 
 	s.AddStep(saga.Step{
 		Execute: func(ctx context.Context) error {
@@ -32,14 +32,29 @@ func ExampleSaga() {
 		},
 	})
 
-	err := s.Execute(context.Background())
+	var err error
+	backgroundCtx := context.Background()
+	defer func() {
+		if err != nil {
+			abort(backgroundCtx, &err)
+		}
+	}()
+
+	err = s.Execute(backgroundCtx)
 	if err != nil {
-		fmt.Printf("Saga failed: %v\n", err)
+		if sagaErr, ok := err.(*saga.SagaError); ok {
+			fmt.Printf("Saga failed: %v\n", sagaErr.OriginalError)
+			if sagaErr.CompensationError != nil {
+				fmt.Printf("Compensation errors: %v\n", sagaErr.CompensationError)
+			}
+		} else {
+			fmt.Printf("Saga failed: %v\n", err)
+		}
 	}
 
 	// Output:
 	// Executing step 1
 	// Executing step 2
 	// Compensating step 1
-	// Saga failed: saga failed: step 2 failed
+	// Saga failed: step 2 failed
 }
