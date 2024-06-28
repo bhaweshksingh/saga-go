@@ -3,9 +3,10 @@ package saga_test
 import (
 	"context"
 	"fmt"
-	"github.com/bhaweshksingh/saga-go/saga"
+	"github.com/bhaweshksingh/saga-go"
 )
 
+// This example demonstrates how to use the Saga library.
 func ExampleSaga() {
 	s := saga.New()
 
@@ -40,5 +41,5 @@ func ExampleSaga() {
 	// Executing step 1
 	// Executing step 2
 	// Compensating step 1
-	// Saga failed: saga failed: step 2 failed; compensation errors: []
+	// Saga failed: saga failed: step 2 failed
 }
